@@ -14,7 +14,6 @@ namespace virtfiles
 	{
 	protected:
 		folder_t* parent;
-		size_t name_size;
 		const char* name;
 
 	public:
@@ -32,22 +31,11 @@ namespace virtfiles
 			folder_t* parent = nullptr)
 			: parent(parent)
 		{
-			name_size = strlen(entry_name);
+			size_t name_size = strlen(entry_name);
 
 			char* name;
 			this->name = name = new char[name_size + 1] {};
 			memcpy(name, entry_name, name_size);
-		}
-
-		base_entry(const std::string& entry_name,
-			folder_t* parent = nullptr)
-			: parent(parent)
-		{
-			name_size = entry_name.length();
-
-			char* name;
-			this->name = name = new char[name_size + 1] {};
-			memcpy(name, entry_name.c_str(), name_size);
 		}
 
 		base_entry(const base_entry&) = delete;
@@ -132,7 +120,7 @@ namespace virtfiles
 			wchar_t lch, rch;
 			const char* li = this->name;
 			const char* ri = name.c_str();
-			const char* lend = li + name_size;
+			const char* lend = li + strlen(name.c_str());
 			const char* rend = ri + name.length();
 
 			while (true)
@@ -202,13 +190,6 @@ namespace virtfiles
 
 	public:
 		file_t(const char* name,
-			folder_t* parent = nullptr)
-			: base_entry(name, parent),
-			content(new char[1] {NULL}), file_size(0)
-		{
-		}
-
-		file_t(const std::string& name,
 			folder_t* parent = nullptr)
 			: base_entry(name, parent),
 			content(new char[1] {NULL}), file_size(0)
@@ -286,11 +267,6 @@ namespace virtfiles
 
 	public:
 		folder_t(const char* name, folder_t* parent = nullptr)
-			: base_entry(name, parent)
-		{
-		}
-
-		folder_t(const std::string& name, folder_t* parent = nullptr)
 			: base_entry(name, parent)
 		{
 		}
@@ -442,7 +418,7 @@ namespace virtfiles
 		{
 			_ThrowIfBadName(name);
 
-			file_t* file = new file_t(name, this);
+			file_t* file = new file_t(name.c_str(), this);
 
 			entries.push_back(file);
 			return *file;
@@ -458,7 +434,7 @@ namespace virtfiles
 		{
 			_ThrowIfBadName(name);
 
-			folder_t* folder = new folder_t(name, this);
+			folder_t* folder = new folder_t(name.c_str(), this);
 
 			entries.push_back(folder);
 			return *folder;
