@@ -373,7 +373,7 @@ namespace virtfiles
 			return true;
 		}
 
-		base_entry* lookup(const path_t& path)
+		base_entry& lookup(const path_t& path)
 		{
 			base_entry* out = this;
 
@@ -382,7 +382,7 @@ namespace virtfiles
 				out = out->as_folder().get_entry(part);
 			}
 
-			return out;
+			return *out;
 		}
 
 		folder_t* _Approach(const path_t& path,
@@ -404,7 +404,7 @@ namespace virtfiles
 					}
 					catch (const file_not_found_error& e)
 					{
-						dir = prev_dir->_createFolder(*i);
+						dir = &prev_dir->_createFolder(*i);
 					}
 				}
 			}
@@ -432,36 +432,36 @@ namespace virtfiles
 			}
 		}
 
-		file_t* createFile(const path_t& path, bool parents = false)
+		file_t& createFile(const path_t& path, bool parents = false)
 		{
 			std::string name;
 			return _Approach(path, name, parents)->_createFile(name);
 		}
 
-		file_t* _createFile(const std::string& name)
+		file_t& _createFile(const std::string& name)
 		{
 			_ThrowIfBadName(name);
 
 			file_t* file = new file_t(name, this);
 
 			entries.push_back(file);
-			return file;
+			return *file;
 		}
 
-		folder_t* createFolder(const path_t& path, bool parents = false)
+		folder_t& createFolder(const path_t& path, bool parents = false)
 		{
 			std::string name;
 			return _Approach(path, name, parents)->_createFolder(name);
 		}
 
-		folder_t* _createFolder(const std::string& name)
+		folder_t& _createFolder(const std::string& name)
 		{
 			_ThrowIfBadName(name);
 
 			folder_t* folder = new folder_t(name, this);
 
 			entries.push_back(folder);
-			return folder;
+			return *folder;
 		}
 	};
 
