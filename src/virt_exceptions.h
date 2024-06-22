@@ -69,6 +69,26 @@ namespace virtfiles
 		}
 	};
 
+	class permission_error
+		: public filesystem_exception
+	{
+	public:
+		permission_error()
+			: filesystem_exception(EPERM, std::generic_category())
+		{
+		}
+
+		permission_error(const char* what_arg)
+			: filesystem_exception(EPERM, std::generic_category(), what_arg)
+		{
+		}
+
+		permission_error(const std::string& what_arg)
+			: filesystem_exception(EPERM, std::generic_category(), what_arg)
+		{
+		}
+	};
+
 	class invalid_path_error
 		: public filesystem_exception
 	{

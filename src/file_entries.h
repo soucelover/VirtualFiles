@@ -73,12 +73,12 @@ namespace virtfiles
 
 		virtual folder_t* as_folder()
 		{
-			return nullptr;
+			throw not_a_directory_error();
 		}
 
 		virtual file_t* as_file()
 		{
-			return nullptr;
+			throw permission_error();
 		}
 
 		static bool check_name(const char* name)
@@ -191,62 +191,6 @@ namespace virtfiles
 			ch = _ch;
 			src += count;
 			return true;
-		}
-	};
-
-	struct entry
-	{
-		entry()
-			: ptr(nullptr) {}
-
-		entry(base_entry* ptr)
-			: ptr(ptr) {}
-
-		base_entry* ptr;
-
-		file_t* as_file()
-		{
-			if (!ptr)
-			{
-				return nullptr;
-			}
-
-			return ptr->as_file();
-		}
-
-		folder_t* as_folder()
-		{
-			if (!ptr)
-			{
-				return nullptr;
-			}
-
-			return ptr->as_folder();
-		}
-
-		operator base_entry* ()
-		{
-			return ptr;
-		}
-
-		operator file_t* ()
-		{
-			return as_file();
-		}
-
-		operator folder_t* ()
-		{
-			return as_folder();
-		}
-
-		operator bool()
-		{
-			return ptr != nullptr;
-		}
-
-		bool operator!()
-		{
-			return !ptr;
 		}
 	};
 
@@ -369,7 +313,7 @@ namespace virtfiles
 			return this;
 		}
 
-		entry get_entry(const std::string& name)
+		base_entry* get_entry(const std::string& name)
 		{
 			if (name == "" || name == ".")
 			{
@@ -429,20 +373,13 @@ namespace virtfiles
 			return true;
 		}
 
-		entry lookup(const path_t& path)
+		base_entry* lookup(const path_t& path)
 		{
-			entry out = this;
+			base_entry* out = this;
 
 			for (std::string part : path.parts)
 			{
-				folder_t* dir = out.as_folder();
-
-				if (!dir)
-				{
-					throw not_a_directory_error();
-				}
-
-				out = dir->get_entry(part);
+				out = out->as_folder()->get_entry(part);
 			}
 
 			return out;
@@ -462,7 +399,10 @@ namespace virtfiles
 				{
 					folder_t* prev_dir = dir;
 
-					if (!(dir = dir->get_entry(*i)))
+					try {
+						dir = dir->get_entry(*i)->as_folder();
+					}
+					catch (const file_not_found_error& e)
 					{
 						dir = prev_dir->_createFolder(*i);
 					}
@@ -472,7 +412,7 @@ namespace virtfiles
 			{
 				for (; i != back; ++i)
 				{
-					dir = dir->get_entry(*i);
+					dir = dir->get_entry(*i)->as_folder();
 				}
 			}
 
