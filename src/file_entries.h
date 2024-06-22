@@ -297,7 +297,7 @@ namespace virtfiles
 		{
 			char* buf = new char[count + 1] {};
 			memcpy(buf, bytes, count);
-			
+
 			delete[] content;
 			content = buf;
 			file_size = count;
@@ -375,7 +375,7 @@ namespace virtfiles
 			{
 				return this;
 			}
-			
+
 			if (name == "..")
 			{
 				return this->parent;
@@ -441,7 +441,47 @@ namespace virtfiles
 			return out;
 		}
 
-		file_t* createFile(const std::string& name)
+		folder_t* _Approach(const path_t& path,
+			std::string& out_name, bool create_parents = false)
+		{
+			folder_t* dir = this;
+			auto i = path.parts.begin();
+			auto back = path.parts.end() - 1;
+			out_name = *back;
+
+			if (create_parents)
+			{
+				for (; i != back; ++i)
+				{
+					folder_t* prev_dir = dir;
+
+					if (!(dir = dir->get_entry(*i)))
+					{
+						dir = prev_dir->_createFolder(*i);
+					}
+				}
+			}
+			else
+			{
+				for (; i != back; ++i)
+				{
+					if (!(dir = dir->get_entry(*i)))
+					{
+						return nullptr;
+					}
+				}
+			}
+
+			return dir;
+		}
+
+		file_t* createFile(const path_t& path, bool parents = false)
+		{
+			std::string name;
+			return _Approach(path, name, parents)->_createFile(name);
+		}
+
+		file_t* _createFile(const std::string& name)
 		{
 			if (!(name_is_free(name) && base_entry::check_name(name.c_str())))
 			{
@@ -454,7 +494,13 @@ namespace virtfiles
 			return file;
 		}
 
-		folder_t* createFolder(const std::string& name)
+		folder_t* createFolder(const path_t& path, bool parents = false)
+		{
+			std::string name;
+			return _Approach(path, name, parents)->_createFolder(name);
+		}
+
+		folder_t* _createFolder(const std::string& name)
 		{
 			if (!(name_is_free(name) && base_entry::check_name(name.c_str())))
 			{
