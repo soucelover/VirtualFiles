@@ -190,6 +190,62 @@ namespace virtfiles
 		}
 	};
 
+	struct entry
+	{
+		entry()
+			: ptr(nullptr) {}
+
+		entry(base_entry* ptr)
+			: ptr(ptr) {}
+
+		base_entry* ptr;
+
+		file_t* as_file()
+		{
+			if (!ptr)
+			{
+				return nullptr;
+			}
+
+			return ptr->as_file();
+		}
+
+		folder_t* as_folder()
+		{
+			if (!ptr)
+			{
+				return nullptr;
+			}
+
+			return ptr->as_folder();
+		}
+
+		operator base_entry* ()
+		{
+			return ptr;
+		}
+
+		operator file_t* ()
+		{
+			return as_file();
+		}
+
+		operator folder_t* ()
+		{
+			return as_folder();
+		}
+
+		operator bool()
+		{
+			return ptr != nullptr;
+		}
+
+		bool operator!()
+		{
+			return !ptr;
+		}
+	};
+
 	class file_t : public base_entry
 	{
 	protected:
