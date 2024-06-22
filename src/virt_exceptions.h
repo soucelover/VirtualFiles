@@ -1,3 +1,5 @@
+#pragma once
+
 #include <system_error>
 
 namespace virtfiles
@@ -6,7 +8,6 @@ namespace virtfiles
 		: public std::system_error
 	{
 		using std::system_error::system_error;
-		using std::system_error::~system_error;
 	};
 
 	class file_exists_error

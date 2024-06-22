@@ -1,3 +1,5 @@
+#pragma once
+
 #include "file_path.h"
 #include "virt_exceptions.h"
 #include <cwctype>
