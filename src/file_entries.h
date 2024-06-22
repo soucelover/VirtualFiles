@@ -71,12 +71,12 @@ namespace virtfiles
 			return false;
 		}
 
-		virtual folder_t* as_folder()
+		virtual folder_t& as_folder()
 		{
 			throw not_a_directory_error();
 		}
 
-		virtual file_t* as_file()
+		virtual file_t& as_file()
 		{
 			throw permission_error();
 		}
@@ -225,9 +225,9 @@ namespace virtfiles
 			return true;
 		}
 
-		file_t* as_file() override
+		file_t& as_file() override
 		{
-			return this;
+			return *this;
 		}
 
 		void empty()
@@ -308,9 +308,9 @@ namespace virtfiles
 			return true;
 		}
 
-		folder_t* as_folder() override
+		folder_t& as_folder() override
 		{
-			return this;
+			return *this;
 		}
 
 		base_entry* get_entry(const std::string& name)
@@ -379,7 +379,7 @@ namespace virtfiles
 
 			for (std::string part : path.parts)
 			{
-				out = out->as_folder()->get_entry(part);
+				out = out->as_folder().get_entry(part);
 			}
 
 			return out;
@@ -400,7 +400,7 @@ namespace virtfiles
 					folder_t* prev_dir = dir;
 
 					try {
-						dir = dir->get_entry(*i)->as_folder();
+						dir = &dir->get_entry(*i)->as_folder();
 					}
 					catch (const file_not_found_error& e)
 					{
@@ -412,7 +412,7 @@ namespace virtfiles
 			{
 				for (; i != back; ++i)
 				{
-					dir = dir->get_entry(*i)->as_folder();
+					dir = &dir->get_entry(*i)->as_folder();
 				}
 			}
 
