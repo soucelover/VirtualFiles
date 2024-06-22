@@ -378,6 +378,11 @@ namespace virtfiles
 
 			if (name == "..")
 			{
+				if (!this->parent)
+				{
+					throw file_not_found_error();
+				}
+
 				return this->parent;
 			}
 
