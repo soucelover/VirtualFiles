@@ -530,6 +530,11 @@ namespace virtfiles
 	protected:
 		folder_t* root;
 	public:
+		constexpr folder_t* get_root() const
+		{
+			return root;
+		}
+
 		filesystem()
 			: filesystem(new folder_t("."))
 		{
