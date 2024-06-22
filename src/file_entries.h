@@ -342,12 +342,12 @@ namespace virtfiles
 		std::vector<base_entry*> entries;
 
 	public:
-		folder_t(const char* name, folder_t* parent)
+		folder_t(const char* name, folder_t* parent = nullptr)
 			: base_entry(name, parent)
 		{
 		}
 
-		folder_t(const std::string& name, folder_t* parent)
+		folder_t(const std::string& name, folder_t* parent = nullptr)
 			: base_entry(name, parent)
 		{
 		}
@@ -520,4 +520,36 @@ namespace virtfiles
 			return folder;
 		}
 	};
+
+	class filesystem
+	{
+	protected:
+		folder_t* root;
+	public:
+		filesystem()
+			: filesystem(new folder_t("."))
+		{
+		}
+
+		filesystem(folder_t* root)
+			: root(root)
+		{
+			_Init();
+		}
+
+		~filesystem()
+		{
+			delete root;
+		}
+
+		filesystem(const filesystem&) = delete;
+		filesystem(filesystem&&) = delete;
+
+		filesystem& operator=(const filesystem&) = delete;
+		filesystem& operator=(filesystem&&) = delete;
+
+		void _Init();
+	};
+
+	static filesystem fs{};
 };
