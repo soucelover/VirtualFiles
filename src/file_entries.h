@@ -1,5 +1,9 @@
 #include <cwctype>
 #include <string>
+#include <vector>
+
+#include "file_path.h"
+
 
 namespace virtfiles
 {
@@ -328,6 +332,139 @@ namespace virtfiles
 		void appendBytes(const std::string& bytes)
 		{
 			appendBytes(bytes.c_str(), bytes.size());
+		}
+	};
+
+	class folder_t : public base_entry
+	{
+	protected:
+		std::vector<base_entry*> entries;
+
+	public:
+		folder_t(const char* name, folder_t* parent)
+			: base_entry(name, parent)
+		{
+		}
+
+		folder_t(const std::string& name, folder_t* parent)
+			: base_entry(name, parent)
+		{
+		}
+
+		virtual ~folder_t()
+		{
+			for (base_entry* entry : entries)
+			{
+				delete entry;
+			}
+		}
+
+		bool is_folder() const override
+		{
+			return true;
+		}
+
+		folder_t* as_folder() override
+		{
+			return this;
+		}
+
+		entry get_entry(const std::string& name)
+		{
+			if (name == "" || name == ".")
+			{
+				return this;
+			}
+			
+			if (name == "..")
+			{
+				return this->parent;
+			}
+
+			for (base_entry* entry : entries)
+			{
+				if (entry->is_named(name))
+				{
+					return entry;
+				}
+			}
+
+			return nullptr;
+		}
+
+		bool name_is_free(const std::string& name)
+		{
+			if (name.length() <= 2) // likea super mega effective check on "", "." and ".."
+			{
+				bool all_dot = true;
+				const char* i = name.c_str();
+
+				for (const char* end = i + name.length(); i < end; ++i)
+				{
+					if (*i != L'.')
+					{
+						all_dot = false;
+					}
+				}
+
+				if (all_dot)
+				{
+					return false;
+				}
+			}
+
+			for (base_entry* entry : entries)
+			{
+				if (entry->is_named(name))
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		entry lookup(const path_t& path)
+		{
+			entry out = this;
+
+			for (std::string part : path.parts)
+			{
+				folder_t* dir = out.as_folder();
+
+				if (!dir && (out = dir->get_entry(part)))
+				{
+					return nullptr;
+				}
+			}
+
+			return out;
+		}
+
+		file_t* createFile(const std::string& name)
+		{
+			if (!(name_is_free(name) && base_entry::check_name(name.c_str())))
+			{
+				return nullptr;
+			}
+
+			file_t* file = new file_t(name, this);
+
+			entries.push_back(file);
+			return file;
+		}
+
+		folder_t* createFolder(const std::string& name)
+		{
+			if (!(name_is_free(name) && base_entry::check_name(name.c_str())))
+			{
+				return nullptr;
+			}
+
+			folder_t* folder = new folder_t(name, this);
+
+			entries.push_back(folder);
+			return folder;
 		}
 	};
 };
