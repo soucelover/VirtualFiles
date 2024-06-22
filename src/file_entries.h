@@ -189,4 +189,89 @@ namespace virtfiles
 			return true;
 		}
 	};
+
+	class file_t : public base_entry
+	{
+	protected:
+		const char* content;
+		size_t file_size;
+
+	public:
+		file_t(const char* name,
+			folder_t* parent = nullptr)
+			: base_entry(name, parent),
+			content(new char[1] {NULL}), file_size(0)
+		{
+		}
+
+		file_t(const std::string& name,
+			folder_t* parent = nullptr)
+			: base_entry(name, parent),
+			content(new char[1] {NULL}), file_size(0)
+		{
+		}
+
+		virtual ~file_t()
+		{
+			delete[] content;
+		}
+
+		bool is_file() const override
+		{
+			return true;
+		}
+
+		file_t* as_file() override
+		{
+			return this;
+		}
+
+		void empty()
+		{
+			delete[] content;
+			content = new char[1] {NULL};
+			file_size = 0;
+		}
+
+		void writeBytes(const char* bytes, size_t count)
+		{
+			char* buf = new char[count + 1] {};
+			memcpy(buf, bytes, count);
+			
+			delete[] content;
+			content = buf;
+			file_size = count;
+		}
+
+		void writeBytes(const char* bytes)
+		{
+			writeBytes(bytes, strlen(bytes));
+		}
+
+		void writeBytes(const std::string& bytes)
+		{
+			writeBytes(bytes.c_str(), bytes.size());
+		}
+
+		void appendBytes(const char* bytes, size_t count)
+		{
+			char* buf = new char[file_size + count + 1] {};
+			memcpy(buf, content, file_size);
+			memcpy(buf + file_size, bytes, count);
+
+			delete[] content;
+			content = buf;
+			file_size += count;
+		}
+
+		void appendBytes(const char* bytes)
+		{
+			appendBytes(bytes, strlen(bytes));
+		}
+
+		void appendBytes(const std::string& bytes)
+		{
+			appendBytes(bytes.c_str(), bytes.size());
+		}
+	};
 };
