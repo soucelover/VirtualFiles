@@ -33,9 +33,13 @@ namespace virtfiles
 		{
 			size_t name_size = strlen(entry_name);
 
-			char* name;
-			this->name = name = new char[name_size + 1] {};
-			memcpy(name, entry_name, name_size);
+			if (!check_name(entry_name, name_size))
+			{
+				throw invalid_path_error();
+			}
+
+			this->name = new char[name_size + 1] {};
+			memcpy(const_cast<char*>(name), entry_name, name_size);
 		}
 
 		base_entry(const base_entry&) = delete;
@@ -69,34 +73,33 @@ namespace virtfiles
 			throw permission_error();
 		}
 
-		static bool check_name(const char* name)
+		static bool check_name(const char* name, size_t size)
 		{
-			size_t len = strlen(name);
 			std::mbstate_t state{};
 
 			wchar_t ch;
 			const char* i = name;
-			const char* end = name + len;
 
-			while (true)
+			while (size > 0)
 			{
-				size_t count = std::mbrtowc(&ch, i, end - name, &state);
+				// Get next char
+				size_t count = std::mbrtowc(&ch, i, size, &state);
 
 				switch (count)
 				{
-				case 0:
-					return true;
 				case static_cast<size_t>(-1):
 				case static_cast<size_t>(-2):
 					return false;
 				}
 
 				i += count;
+				size -= count;
 
 				if (ch >= 0x00 && ch <= 0x1f) // special characters
 				{
 					return false;
 				}
+
 				switch (ch)
 				{
 				case L'<':
@@ -120,36 +123,22 @@ namespace virtfiles
 			wchar_t lch, rch;
 			const char* li = this->name;
 			const char* ri = name.c_str();
-			const char* lend = li + strlen(name.c_str());
-			const char* rend = ri + name.length();
+			size_t lleft = strlen(this->name);
+			size_t rleft = name.length();
 
-			while (true)
+			while (lleft > 0 && rleft > 0)
 			{
-				if (!(_is_named_next_char(lch, li, lend, &state) && _is_named_next_char(rch, ri, rend, &state)))
-				{
-					if (lch == L'?') // it's last char and it's incomplete
-					{
-						if (lend - li != rend - ri)
-						{
-							return false;
-						}
-						if (memcmp(li, ri, lend - li) != 0)
-						{
-							return false;
-						}
-						return true;
-					}
-					else // some encoding error or null character
-					{
-						if (li == lend && ri == rend)
-						{
-							return true;
-						}
+				_is_named_next_char(lch, li, lleft, &state);
+				_is_named_next_char(rch, ri, rleft, &state);
 
-						return false;
-					}
+				// Null characters cannot be just in strings
+				// So this can only consider to be an error
+				if (lch == 0 || rch == 0)
+				{
+					return false;
 				}
 
+				// Case independently comparing characters
 				if (std::towlower(static_cast<wint_t>(lch)) != std::towlower(static_cast<wint_t>(rch)))
 				{
 					return false;
@@ -158,27 +147,24 @@ namespace virtfiles
 		}
 
 	private:
-		static bool _is_named_next_char(wchar_t& ch,
-			const char*& src, const char* src_end,
+		static void _is_named_next_char(wchar_t& ch,
+			const char*& src, size_t& src_left,
 			std::mbstate_t* state)
 		{
-			wchar_t _ch;
-			size_t count = std::mbrtowc(&_ch, src, src_end - src, state);
+			// Convert next character
+			size_t count = std::mbrtowc(&ch, src, src_left, state);
 
-			if (count == 0 || count == static_cast<size_t>(-1))
+			// If error, set null char
+			switch (count)
 			{
-				ch = L'\0';
-				return false;
-			}
-			else if (count == static_cast<size_t>(-2))
-			{
-				ch = L'?';
-				return false;
+			case static_cast<size_t>(-1):
+			case static_cast<size_t>(-2):
+				ch = 0;
+				return;
 			}
 
-			ch = _ch;
 			src += count;
-			return true;
+			src_left -= count;
 		}
 	};
 
@@ -362,7 +348,7 @@ namespace virtfiles
 		}
 
 		folder_t* _Approach(const path_t& path,
-			std::string& out_name, bool create_parents = false)
+			const char*& out_name, bool create_parents = false)
 		{
 			folder_t* dir = this;
 			auto i = path.parts.begin();
@@ -378,7 +364,7 @@ namespace virtfiles
 					try {
 						dir = &dir->get_entry(*i)->as_folder();
 					}
-					catch (const file_not_found_error& e)
+					catch (const file_not_found_error&)
 					{
 						dir = &prev_dir->_createFolder(*i);
 					}
@@ -395,30 +381,20 @@ namespace virtfiles
 			return dir;
 		}
 
-		void _ThrowIfBadName(const std::string& name)
+		file_t& createFile(const path_t& path, bool parents = false)
+		{
+			const char* name;
+			return _Approach(path, name, parents)->_createFile(name);
+		}
+
+		file_t& _createFile(const char* name)
 		{
 			if (!name_is_free(name))
 			{
 				throw file_exists_error();
 			}
 
-			if (!base_entry::check_name(name.c_str()))
-			{
-				throw invalid_path_error();
-			}
-		}
-
-		file_t& createFile(const path_t& path, bool parents = false)
-		{
-			std::string name;
-			return _Approach(path, name, parents)->_createFile(name);
-		}
-
-		file_t& _createFile(const std::string& name)
-		{
-			_ThrowIfBadName(name);
-
-			file_t* file = new file_t(name.c_str(), this);
+			file_t* file = new file_t(name, this);
 
 			entries.push_back(file);
 			return *file;
@@ -426,15 +402,18 @@ namespace virtfiles
 
 		folder_t& createFolder(const path_t& path, bool parents = false)
 		{
-			std::string name;
+			const char* name;
 			return _Approach(path, name, parents)->_createFolder(name);
 		}
 
-		folder_t& _createFolder(const std::string& name)
+		folder_t& _createFolder(const char* name)
 		{
-			_ThrowIfBadName(name);
+			if (!name_is_free(name))
+			{
+				throw file_exists_error();
+			}
 
-			folder_t* folder = new folder_t(name.c_str(), this);
+			folder_t* folder = new folder_t(name, this);
 
 			entries.push_back(folder);
 			return *folder;
