@@ -1,9 +1,8 @@
+#include "file_path.h"
+#include "virt_exceptions.h"
 #include <cwctype>
 #include <string>
 #include <vector>
-
-#include "file_path.h"
-#include "virt_exceptions.h"
 
 
 namespace virtfiles
