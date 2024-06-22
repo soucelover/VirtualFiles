@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "file_path.h"
+#include "virt_exceptions.h"
 
 
 namespace virtfiles
@@ -389,7 +390,7 @@ namespace virtfiles
 				}
 			}
 
-			return nullptr;
+			throw file_not_found_error();
 		}
 
 		bool name_is_free(const std::string& name)
@@ -432,10 +433,12 @@ namespace virtfiles
 			{
 				folder_t* dir = out.as_folder();
 
-				if (!dir && (out = dir->get_entry(part)))
+				if (!dir)
 				{
-					return nullptr;
+					throw not_a_directory_error();
 				}
+
+				out = dir->get_entry(part);
 			}
 
 			return out;
@@ -465,14 +468,24 @@ namespace virtfiles
 			{
 				for (; i != back; ++i)
 				{
-					if (!(dir = dir->get_entry(*i)))
-					{
-						return nullptr;
-					}
+					dir = dir->get_entry(*i);
 				}
 			}
 
 			return dir;
+		}
+
+		void _ThrowIfBadName(const std::string& name)
+		{
+			if (!name_is_free(name))
+			{
+				throw file_exists_error();
+			}
+
+			if (!base_entry::check_name(name.c_str()))
+			{
+				throw invalid_path_error();
+			}
 		}
 
 		file_t* createFile(const path_t& path, bool parents = false)
@@ -483,10 +496,7 @@ namespace virtfiles
 
 		file_t* _createFile(const std::string& name)
 		{
-			if (!(name_is_free(name) && base_entry::check_name(name.c_str())))
-			{
-				return nullptr;
-			}
+			_ThrowIfBadName(name);
 
 			file_t* file = new file_t(name, this);
 
@@ -502,10 +512,7 @@ namespace virtfiles
 
 		folder_t* _createFolder(const std::string& name)
 		{
-			if (!(name_is_free(name) && base_entry::check_name(name.c_str())))
-			{
-				return nullptr;
-			}
+			_ThrowIfBadName(name);
 
 			folder_t* folder = new folder_t(name, this);
 
