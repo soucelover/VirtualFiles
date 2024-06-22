@@ -8,9 +8,6 @@ namespace virtfiles
 {
 	class path_t
 	{
-	protected:
-		std::string path_string;
-
 	public:
 		class parts_t
 		{
@@ -147,21 +144,14 @@ namespace virtfiles
 
 		path_t(const std::string& path)
 		{
-			path_string = path;
 			parts.init(path);
 		}
 
 		path_t& operator=(const std::string& path)
 		{
-			path_string = path;
 			parts.init(path);
 
 			return *this;
-		}
-
-		constexpr const std::string& str() const
-		{
-			return path_string;
 		}
 	};
 
