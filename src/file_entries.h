@@ -177,6 +177,11 @@ namespace virtfiles
 		size_t file_size;
 
 	public:
+		std::string getContent() const
+		{
+			return std::string(content, file_size);
+		}
+
 		file_t(const char* name,
 			folder_t* parent = nullptr)
 			: base_entry(name, parent),
