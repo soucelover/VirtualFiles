@@ -1,6 +1,7 @@
 #pragma once
 
 #include "file_entries.h"
+#include "virt_filebuf.h"
 #include <istream>
 
 namespace virtfiles
@@ -45,16 +46,21 @@ namespace virtfiles
 
 		basic_ifstream(const basic_ifstream&) = delete;
 
-		basic_ifstream(basic_ifstream&& other)
-			: _Mybase(other)
+		basic_ifstream(basic_ifstream&& other) noexcept
+			: _Mybase(std::move(other))
 		{
-			_Myios::set_rdbuf(new _Mybuf(other.rdbuf()));
+			_Myios::set_rdbuf(new _Mybuf(std::move(*other.rdbuf())));
 		}
 
-		basic_ifstream& operator=(basic_ifstream&& other)
+		virtual ~basic_ifstream()
 		{
-			_Mybase::operator=(other);
-			rdbuf()->operator=(other.rdbuf());
+			delete _Myios::rdbuf();
+		}
+
+		basic_ifstream& operator=(basic_ifstream&& other) noexcept
+		{
+			_Mybase::operator=(std::move(other));
+			rdbuf()->operator=(std::move(*other.rdbuf()));
 
 			return *this;
 		}
@@ -89,7 +95,7 @@ namespace virtfiles
 
 		void close()
 		{
-			if (!rdbuf->close())
+			if (!rdbuf()->close())
 			{
 				_Myios::setstate(_Myios::failbit);
 			}
@@ -139,16 +145,21 @@ namespace virtfiles
 
 		basic_ofstream(const basic_ofstream&) = delete;
 
-		basic_ofstream(basic_ofstream&& other)
-			: _Mybase(other)
+		basic_ofstream(basic_ofstream&& other) noexcept
+			: _Mybase(std::move(other))
 		{
-			_Myios::set_rdbuf(new _Mybuf(other.rdbuf()));
+			_Myios::set_rdbuf(new _Mybuf(std::move(*other.rdbuf())));
 		}
 
-		basic_ofstream& operator=(basic_ofstream&& other)
+		virtual ~basic_ofstream()
 		{
-			_Mybase::operator=(other);
-			rdbuf()->operator=(other.rdbuf());
+			delete _Myios::rdbuf();
+		}
+
+		basic_ofstream& operator=(basic_ofstream&& other) noexcept
+		{
+			_Mybase::operator=(std::move(other));
+			rdbuf()->operator=(std::move(*other.rdbuf()));
 
 			return *this;
 		}
@@ -183,7 +194,7 @@ namespace virtfiles
 
 		void close()
 		{
-			if (!rdbuf->close())
+			if (!rdbuf()->close())
 			{
 				_Myios::setstate(_Myios::failbit);
 			}
@@ -233,16 +244,21 @@ namespace virtfiles
 
 		basic_fstream(const basic_fstream&) = delete;
 
-		basic_fstream(basic_fstream&& other)
-			: _Mybase(other)
+		basic_fstream(basic_fstream&& other) noexcept
+			: _Mybase(std::move(other))
 		{
-			_Myios::set_rdbuf(new _Mybuf(other.rdbuf()));
+			_Myios::set_rdbuf(new _Mybuf(std::move(*other.rdbuf())));
 		}
 
-		basic_fstream& operator=(basic_fstream&& other)
+		virtual ~basic_fstream()
 		{
-			_Mybase::operator=(other);
-			rdbuf()->operator=(other.rdbuf());
+			delete _Myios::rdbuf();
+		}
+
+		basic_fstream& operator=(basic_fstream&& other) noexcept
+		{
+			_Mybase::operator=(std::move(other));
+			rdbuf()->operator=(std::move(*other.rdbuf()));
 
 			return *this;
 		}
@@ -277,7 +293,7 @@ namespace virtfiles
 
 		void close()
 		{
-			if (!rdbuf->close())
+			if (!rdbuf()->close())
 			{
 				_Myios::setstate(_Myios::failbit);
 			}

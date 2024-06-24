@@ -391,7 +391,9 @@ namespace virtfiles
 		file_t& createFile(const path_t& path, bool parents = false)
 		{
 			const char* name;
-			return _Approach(path, name, parents)->_createFile(name);
+			folder_t* dir = _Approach(path, name, parents);
+
+			return dir->_createFile(name);
 		}
 
 		file_t& _createFile(const char* name)
@@ -410,7 +412,9 @@ namespace virtfiles
 		folder_t& createFolder(const path_t& path, bool parents = false)
 		{
 			const char* name;
-			return _Approach(path, name, parents)->_createFolder(name);
+			folder_t* dir = _Approach(path, name, parents);
+
+			return dir->_createFolder(name);
 		}
 
 		folder_t& _createFolder(const char* name)

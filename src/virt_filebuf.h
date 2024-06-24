@@ -76,7 +76,7 @@ namespace virtfiles
 
 			try
 			{
-				myfile = fs.get_root()->lookup(filepath);
+				myfile = &fs.get_root()->lookup(filepath).as_file();
 			}
 			catch (const filesystem_exception&)
 			{
@@ -110,7 +110,7 @@ namespace virtfiles
 				// create new file
 				try
 				{
-					myfile = fs.get_root()->createFile(filepath);
+					myfile = &fs.get_root()->createFile(filepath);
 				}
 				catch (const filesystem_exception&)
 				{
@@ -551,10 +551,10 @@ namespace virtfiles
 			memcpy(buffer_start, ob_start, ob_fend - ob_start);
 			delete[] ob_start;
 
-			buffer_pos = buffer_start + ob_pos - ob_start;
-			buffer_fend = buffer_start + ob_fend - ob_start;
+			buffer_pos = ob_pos - ob_start + buffer_start;
+			buffer_fend = ob_fend - ob_start + buffer_start;
 
-			put_area_start = buffer_start + ob_put_area_start - ob_start;
+			put_area_start = ob_put_area_start - ob_start + buffer_start;
 		}
 
 		bool flush_buffer()
@@ -644,7 +644,7 @@ namespace virtfiles
 			const std::string& from,
 			CharT*& converted)
 		{
-			if (!cvt) // just copy raw
+			if (!buffer->mycvt) // just copy raw
 			{
 			noconv:
 				const size_t size = from.size();
@@ -666,7 +666,7 @@ namespace virtfiles
 				CharT* tmp_buf_next = nullptr;
 
 				switch (buffer->mycvt->in(
-					buffer->cvtstate,
+					buffer->convstate,
 					from_next, from_end, from_next,
 					tmp_buf, tmp_buf + tmp_buf_size, tmp_buf_next
 				))

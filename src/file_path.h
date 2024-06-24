@@ -142,6 +142,11 @@ namespace virtfiles
 
 		path_t() = default;
 
+		path_t(const char* path)
+		{
+			parts.init(path);
+		}
+
 		path_t(const std::string& path)
 		{
 			parts.init(path);
