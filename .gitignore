@@ -2,4 +2,5 @@
 .vs
 
 # Build output files
-out/build/
+build
+out
