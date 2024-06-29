@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -90,7 +91,7 @@ namespace virtfiles
 					case '/':
 					case '\\':
 						// Finish previous part by NULL character
-						*str = NULL;
+						*str = 0;
 						out.push_back(str + 1);
 					}
 				}

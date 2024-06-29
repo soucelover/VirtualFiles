@@ -2,6 +2,7 @@
 
 #include "file_entries.h"
 #include "virt_filebuf.h"
+#include <fstream>
 #include <istream>
 
 namespace virtfiles
@@ -28,7 +29,7 @@ namespace virtfiles
 
 		explicit basic_ifstream(
 			const char* filename,
-			_Myios::openmode mode = _Myios::in
+			std::ios_base::openmode mode = _Myios::in
 		) : basic_ifstream()
 		{
 			if (!rdbuf()->open(filename, mode | _Myios::in))
@@ -39,7 +40,7 @@ namespace virtfiles
 
 		explicit basic_ifstream(
 			const std::string& filename,
-			_Myios::openmode mode = _Myios::in
+			std::ios_base::openmode mode = _Myios::in
 		) : basic_ifstream(filename.c_str(), mode)
 		{
 		}
@@ -78,17 +79,17 @@ namespace virtfiles
 
 		bool is_open() const
 		{
-			return rdbuf->is_open();
+			return rdbuf()->is_open();
 		}
 
 		void open(const char* filename,
-			_Myios::openmode mode = _Myios::in)
+			std::ios_base::openmode mode = _Myios::in)
 		{
 			rdbuf()->open(filename, mode | _Myios::in);
 		}
 
 		void open(const std::string& filename,
-			_Myios::openmode mode = _Myios::in)
+			std::ios_base::openmode mode = _Myios::in)
 		{
 			rdbuf()->open(filename.c_str(), mode | _Myios::in);
 		}
@@ -103,7 +104,11 @@ namespace virtfiles
 	};
 
 	typedef basic_ifstream<char> ifstream;
-	typedef basic_ifstream<wchar_t> iwfstream;
+	typedef basic_ifstream<wchar_t> wifstream;
+
+#define basic_ifstream ::virtfiles::basic_ifstream
+#define ifstream ::virtfiles::ifstream
+#define iwfstream ::virtfiles::wifstream
 
 	template <class CharT, class Traits = std::char_traits<CharT>>
 	class basic_ofstream : public std::basic_ostream<CharT, Traits>
@@ -127,7 +132,7 @@ namespace virtfiles
 
 		explicit basic_ofstream(
 			const char* filename,
-			_Myios::openmode mode = _Myios::out
+			std::ios_base::openmode mode = _Myios::out
 		) : basic_ofstream()
 		{
 			if (!rdbuf()->open(filename, mode | _Myios::out))
@@ -138,7 +143,7 @@ namespace virtfiles
 
 		explicit basic_ofstream(
 			const std::string& filename,
-			_Myios::openmode mode = _Myios::out
+			std::ios_base::openmode mode = _Myios::out
 		) : basic_ofstream(filename.c_str(), mode)
 		{
 		}
@@ -177,17 +182,17 @@ namespace virtfiles
 
 		bool is_open() const
 		{
-			return rdbuf->is_open();
+			return rdbuf()->is_open();
 		}
 
 		void open(const char* filename,
-			_Myios::openmode mode = _Myios::out)
+			std::ios_base::openmode mode = _Myios::out)
 		{
 			rdbuf()->open(filename, mode | _Myios::out);
 		}
 
 		void open(const std::string& filename,
-			_Myios::openmode mode = _Myios::out)
+			std::ios_base::openmode mode = _Myios::out)
 		{
 			rdbuf()->open(filename.c_str(), mode | _Myios::out);
 		}
@@ -202,7 +207,11 @@ namespace virtfiles
 	};
 
 	typedef basic_ofstream<char> ofstream;
-	typedef basic_ofstream<wchar_t> owfstream;
+	typedef basic_ofstream<wchar_t> wofstream;
+
+#define basic_ofstream ::virtfiles::basic_ofstream
+#define ofstream ::virtfiles::ofstream
+#define owfstream ::virtfiles::wofstream
 
 	template <class CharT, class Traits = std::char_traits<CharT>>
 	class basic_fstream : public std::basic_iostream<CharT, Traits>
@@ -226,7 +235,7 @@ namespace virtfiles
 
 		explicit basic_fstream(
 			const char* filename,
-			_Myios::openmode mode = _Myios::in | _Myios::out
+			std::ios_base::openmode mode = _Myios::in | _Myios::out
 		) : basic_fstream()
 		{
 			if (!rdbuf()->open(filename, mode))
@@ -237,7 +246,7 @@ namespace virtfiles
 
 		explicit basic_fstream(
 			const std::string& filename,
-			_Myios::openmode mode = _Myios::in | _Myios::out
+			std::ios_base::openmode mode = _Myios::in | _Myios::out
 		) : basic_fstream(filename.c_str(), mode)
 		{
 		}
@@ -276,17 +285,17 @@ namespace virtfiles
 
 		bool is_open() const
 		{
-			return rdbuf->is_open();
+			return rdbuf()->is_open();
 		}
 
 		void open(const char* filename,
-			_Myios::openmode mode = _Myios::in | _Myios::out)
+			std::ios_base::openmode mode = _Myios::in | _Myios::out)
 		{
 			rdbuf()->open(filename, mode);
 		}
 
 		void open(const std::string& filename,
-			_Myios::openmode mode = _Myios::in | _Myios::out)
+			std::ios_base::openmode mode = _Myios::in | _Myios::out)
 		{
 			rdbuf()->open(filename.c_str(), mode);
 		}
@@ -302,6 +311,10 @@ namespace virtfiles
 
 	typedef basic_fstream<char> fstream;
 	typedef basic_fstream<wchar_t> wfstream;
+
+#define basic_fstream ::virtfiles::basic_fstream
+#define fstream ::virtfiles::fstream
+#define wfstream ::virtfiles::wfstream
 };
 
 namespace std
@@ -333,7 +346,3 @@ namespace std
 		lhs.swap(rhs);
 	}
 };
-
-#define ifstream ::virtfiles::ifstream
-#define ofstream ::virtfiles::ofstream
-#define fstream ::virtfiles::fstream

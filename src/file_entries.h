@@ -19,12 +19,12 @@ namespace virtfiles
 		const char* name;
 
 	public:
-		constexpr const char* getName() const
+		const char* get_name() const
 		{
 			return name;
 		}
 
-		constexpr folder_t* getParent() const
+		folder_t* get_parent() const
 		{
 			return parent;
 		}
@@ -116,6 +116,8 @@ namespace virtfiles
 					return false;
 				}
 			}
+
+			return true;
 		}
 
 		bool is_named(const std::string& name) const
@@ -146,6 +148,8 @@ namespace virtfiles
 					return false;
 				}
 			}
+
+			return true;
 		}
 
 	private:
@@ -185,7 +189,7 @@ namespace virtfiles
 		file_t(const char* name,
 			folder_t* parent = nullptr)
 			: base_entry(name, parent),
-			content(new char[1] {NULL}), file_size(0)
+			content(new char[1] {0}), file_size(0)
 		{
 		}
 
@@ -207,7 +211,7 @@ namespace virtfiles
 		void empty()
 		{
 			delete[] content;
-			content = new char[1] {NULL};
+			content = new char[1] {0};
 			file_size = 0;
 		}
 
@@ -259,6 +263,11 @@ namespace virtfiles
 		std::vector<base_entry*> entries;
 
 	public:
+		const std::vector<base_entry*>& get_items()
+		{
+			return entries;
+		}
+
 		folder_t(const char* name, folder_t* parent = nullptr)
 			: base_entry(name, parent)
 		{
@@ -436,7 +445,7 @@ namespace virtfiles
 	protected:
 		folder_t* root;
 	public:
-		constexpr folder_t* get_root() const
+		folder_t* get_root() const
 		{
 			return root;
 		}

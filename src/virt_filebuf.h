@@ -1,6 +1,7 @@
 #pragma once
 
 #include "file_entries.h"
+#include <locale>
 #include <streambuf>
 
 
@@ -57,7 +58,7 @@ namespace virtfiles
 			basic_filebuf state_save = std::move(other);
 
 			other._init(*this);
-			this->_init(state_sav);
+			this->_init(state_save);
 
 			state_save._init(nullptr);
 		}
