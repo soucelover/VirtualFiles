@@ -458,11 +458,13 @@ namespace virtfiles
 		filesystem(folder_t* root)
 			: root(root)
 		{
-			_Init();
+			init();
 		}
 
 		~filesystem()
 		{
+			before_uninit();
+
 			delete root;
 		}
 
@@ -472,7 +474,8 @@ namespace virtfiles
 		filesystem& operator=(const filesystem&) = delete;
 		filesystem& operator=(filesystem&&) = delete;
 
-		void _Init();
+		void init();
+		void before_uninit();
 	};
 
 	static filesystem fs{};
