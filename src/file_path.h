@@ -20,12 +20,12 @@ namespace virtfiles
 		public:
 			class iterator;
 
-			constexpr size_t get_count() const
+			size_t get_count() const
 			{
 				return count;
 			}
 
-			constexpr const char* str() const
+			const char* str() const
 			{
 				return items_str;
 			}
@@ -128,7 +128,7 @@ namespace virtfiles
 				}
 			}
 
-			constexpr const char* const& operator[] (long long index) const
+			const char* const& operator[] (long long index) const
 			{
 				return items[index];
 			}
@@ -225,7 +225,7 @@ namespace virtfiles
 			const_cast<long long&>(other.index) = index_sav;
 		}
 
-		constexpr iterator& operator++()
+		iterator& operator++()
 		{
 			++index;
 			return *this;
@@ -238,7 +238,7 @@ namespace virtfiles
 			return sav;
 		}
 
-		constexpr iterator& operator--()
+		iterator& operator--()
 		{
 			--index;
 			return *this;
@@ -251,22 +251,22 @@ namespace virtfiles
 			return sav;
 		}
 
-		constexpr reference operator*() const
+		reference operator*() const
 		{
 			return (*parts)[index];
 		}
 
-		constexpr bool operator==(const iterator& other) const
+		bool operator==(const iterator& other) const
 		{
 			return parts == other.parts && index == other.index;
 		}
 
-		constexpr bool operator!=(const iterator& other) const
+		bool operator!=(const iterator& other) const
 		{
 			return !(*this == other);
 		}
 
-		constexpr iterator& operator+=(long long diff)
+		iterator& operator+=(long long diff)
 		{
 			index += diff;
 			return *this;
@@ -277,7 +277,7 @@ namespace virtfiles
 			return iterator(parts, index + diff);
 		}
 
-		constexpr iterator& operator-=(long long diff)
+		iterator& operator-=(long long diff)
 		{
 			index -= diff;
 			return *this;
@@ -293,37 +293,37 @@ namespace virtfiles
 			return index - other.index;
 		}
 
-		constexpr reference operator[](long long idx)
+		reference operator[](long long idx)
 		{
 			return (*parts)[index + idx];
 		}
 
-		constexpr bool operator<(const iterator& other)
+		bool operator<(const iterator& other)
 		{
 			return index < other.index;
 		}
 
-		constexpr bool operator>(const iterator& other)
+		bool operator>(const iterator& other)
 		{
 			return index > other.index;
 		}
 
-		constexpr bool operator<=(const iterator& other)
+		bool operator<=(const iterator& other)
 		{
 			return index <= other.index;
 		}
 
-		constexpr bool operator>=(const iterator& other)
+		bool operator>=(const iterator& other)
 		{
 			return index >= other.index;
 		}
 
-		constexpr const path_t::parts_t& get_path() const
+		const path_t::parts_t& get_path() const
 		{
 			return *parts;
 		}
 
-		constexpr long long get_index() const
+		long long get_index() const
 		{
 			return index;
 		}
