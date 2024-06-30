@@ -68,6 +68,7 @@ class HeaderParser:
 
 def main() -> None:
     parser = HeaderParser()
+    output_folder.mkdir(parents=True, exist_ok=True)
 
     with (output_folder / "main.h").open("w") as fs:
         fs.writelines(parser.parse_header("main.h"))
