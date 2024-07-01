@@ -91,7 +91,7 @@ namespace virtfiles
 			if (myfile) // file exists
 			{
 				// if shouldn't truncate
-				if (!(mode & _Myios::trunc || _only_out))
+				if (!(mode & _Myios::trunc || _only_out) || mode & _Myios::app)
 				{
 					// read content
 					// NOTE: when file::read_bytes will handle text mode, fix this line
@@ -592,16 +592,16 @@ namespace virtfiles
 			if (!mycvt) // just copy raw
 			{
 			noconv:
-				const size_t size = buffer_fend - buffer_start;
+				const size_t size = buffer_fend - put_area_start;
 				char* out = new char[size + 1] {'\0'};
-				memcpy(out, buffer_start, size * sizeof(CharT));
+				memcpy(out, put_area_start, size * sizeof(CharT));
 
 				converted = out;
 				return size;
 			}
 
 			std::string out_buf;
-			const CharT* from_next = buffer_start;
+			const CharT* from_next = put_area_start;
 
 			while (true)
 			{
